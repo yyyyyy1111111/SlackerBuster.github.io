@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <title>摸鱼消消乐</title>
+    <style>
+      body {
+        background-image: url('/Users/yy/Desktop/text横排/图片/20180917120412347.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+      .page-container {
+        height: 85vh;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 60px 30px;
+        padding: 24px;
+        justify-items: center; /* Center the icons horizontally */
+        align-items:start; /* Center the icons vertically */
+        grid-auto-rows: minmax(85px, 60px); /* Define the height of each row */
+      }
+
+      .app-icon {
+        position: relative;
+        width: 54px;
+        height: 54px;
+        background-color: #555;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 50px;
+        cursor: pointer;
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -15px;
+        width: 21px;
+        height: 21px;
+        background-color: red;
+        color: #fff;
+        font-size: 14px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.3s ease-in-out;
+        opacity: 0;
+      }
+
+      .notification-badge.show {
+        opacity: 1;
+      }
+
+      .game-over {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        font-size: 36px;
+      }
+      .app-icon.explode {
+    animation-name: explodeAnimation;
+    animation-duration: 0.5s; /* Adjust the duration of the explosion animation */
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+  }
+  @keyframes explodeAnimation {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+      .pagination {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .pagination button {
+        margin: -10px 5px;
+      }
+
+      .page-indicator {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-container" id="page1">
+    </div>
+    <div class="page-container" id="page2">
+    </div>
+    <div class="page-container" id="page3">
+    </div>
+    <div class="page-container" id="page4">
+    </div>
+    <div class="game-over" style="display: none;">
+      <h1>GAME OVER</h1>
+      <div id="gameDuration"></div>
+    </div>
+    <div class="pagination">
+      <button id="prevPage">上一页</button>
+      <span class="page-indicator" id="currentPageIndicator"></span>
+      <button id="nextPage">下一页</button>
+    </div>
+    <script>
+      var iconCounts = [10, 4, 8, 6];
+      var pages = document.getElementsByClassName('page-container');
+      var notificationInterval;
+      var incrementInterval;
+      var gameOverMessage = document.getElementsByClassName('game-over')[0];
+      var gameDurationText = document.getElementById('gameDuration');
+      var currentPage = 1;
+      var currentPageIndicator = document.getElementById('currentPageIndicator');
+      var startTime;
+      
+      // Preload audio files
+      var audio1 = new Audio('notification.m4a');
+var audio2 = new Audio('notification2.m4a');
+var replyAudio = new Audio('回复.m4a');
+
+
+      function showPage(page) {
+        for (var i = 0; i < pages.length; i++) {
+          if (i + 1 === page) {
+            pages[i].style.display = 'grid';
+          } else {
+            pages[i].style.display = 'none';
+          }
+        }
+
+        currentPageIndicator.textContent = '当前页: ' + page + ' / ' + pages.length;
+      }
+
+      function generateIcons(container, iconCount, startIconIndex, audio) {
+        container.innerHTML = '';
+
+        for (var i = startIconIndex; i < startIconIndex + iconCount; i++) {
+          var appIcon = document.createElement('div');
+          appIcon.className = 'app-icon';
+
+          var img = document.createElement('img');
+          img.src = '/Users/yy/Desktop/text横排/图片/icon' + i + '.png';
+          img.alt = 'Icon ' + i;
+          img.width = 60;
+          img.height = 60;
+          appIcon.appendChild(img);
+
+          var notificationBadge = document.createElement('span');
+          notificationBadge.className = 'notification-badge';
+          appIcon.appendChild(notificationBadge);
+
+          container.appendChild(appIcon);
+        }
+
+        var notificationCounts = new Array(iconCount).fill(0);//都一样
+
+        for (var i = 1; i <= iconCount; i++) {//特有
+          var appIcon = container.children[i - 1];
+          appIcon.addEventListener('click', function(event) {
+            var iconIndex = Array.from(container.children).indexOf(event.currentTarget) + 1;
+            clearNotification(iconIndex, container, audio);
+            playReplySound();
+          });
+        }
+
+        function showRandomNotification() {//都一样
+          var randomIconIndex = Math.floor(Math.random() * iconCount) + 1;
+          notificationCounts[randomIconIndex - 1]++;
+          var notificationBadge = container.children[randomIconIndex - 1].querySelector('.notification-badge');
+          notificationBadge.innerText = notificationCounts[randomIconIndex - 1];
+          notificationBadge.classList.add('show');
+
+          if (notificationCounts.includes(6) || notificationCounts.includes(7) || notificationCounts.includes(8) || notificationCounts.includes(9)) {
+        playNotificationSound2();
+      } else if (notificationCounts[randomIconIndex - 1] === 1) {
+        playNotificationSound1();
+        }
+        }
+
+        function playNotificationSound1() {//都一样184
+        audio1.currentTime = 0;
+        var playPromise = audio1.play();
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {
+            // Audio started playing
+          }).catch(error => {
+            // Audio playback failed
+          });
+        }
+      }
+        function clearNotification(iconIndex,container, audio) {//和下面对比一下
+          var appIcon = container.children[iconIndex - 1];
+        var notificationBadge = appIcon.querySelector('.notification-badge');
+
+          // Animate the countdown effect
+      var count = 5; // Countdown from 5 to 0
+      var countdownInterval = setInterval(function() {
+      notificationBadge.innerText = count--;
+      if (count < 0) {
+        clearInterval(countdownInterval);
+
+        // Animate the explosion effect
+        appIcon.classList.add('explode');
+        setTimeout(function() {
+
+          // Remove the exploded icon from the container
+          appIcon.classList.remove('explode');
+          notificationCounts[iconIndex - 1] = 0;
+          notificationBadge.innerText = '';//一样
+          notificationBadge.classList.remove('show');//一样
+        }, 200); // Adjust the duration of the explosion effect
+        }
+      }, 10); // Adjust the countdown interval timing
+        }
+
+        function playNotificationSound2() {
+        audio2.currentTime = 0;
+        var playPromise = audio2.play();
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {
+            // Audio started playing
+          }).catch(error => {
+            // Audio playback failed
+          });
+        }
+      }
+        
+        function playReplySound() { 
+        replyAudio.currentTime = 0;
+        var playPromise = replyAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {
+            // Audio started playing
+          }).catch(error => {
+            // Audio playback failed
+          });
+        }
+      }
+
+        startTime = new Date().getTime();
+        setInterval(showRandomNotification, 1000);
+        incrementInterval = setInterval(incrementNotificationCounts, 1000);
+
+        function incrementNotificationCounts() {
+          for (var i = 0; i < notificationCounts.length; i++) {
+            if (notificationCounts[i] > 0) {
+              var notificationBadge = container.children[i].querySelector('.notification-badge');
+              notificationCounts[i]++;
+              notificationBadge.innerText = notificationCounts[i];
+            }
+          }
+
+          if (notificationCounts.some(count => count >= 10)) {
+            clearInterval(notificationInterval);
+            clearInterval(incrementInterval);
+            gameOverMessage.style.display = 'block';
+            gameDurationText.textContent = calculateGameDuration();
+          }
+        }
+
+        function calculateGameDuration() {
+          var currentTime = new Date();
+          var endTime = currentTime.getTime();
+          var duration = endTime - startTime;
+          var minutes = Math.floor(duration / 60000);
+          var seconds = Math.floor((duration % 60000) / 1000);
+          return minutes + ' 分 ' + padZero(seconds) + ' 秒';
+        }
+
+        function padZero(num) {
+          return (num < 10 ? '0' : '') + num;
+        }
+
+        
+      }
+
+      function init() {
+        showPage(currentPage);
+
+        document.getElementById('prevPage').addEventListener('click', function() {
+          if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+          }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', function() {
+          if (currentPage < pages.length) {
+            currentPage++;
+            showPage(currentPage);
+          }
+        });
+
+        document.addEventListener('keydown', function(event) {
+          if (event.keyCode === 37) { // Left arrow key
+            if (currentPage > 1) {
+              currentPage--;
+              showPage(currentPage);
+            }
+          } else if (event.keyCode === 39) { // Right arrow key
+            if (currentPage < pages.length) {
+              currentPage++;
+              showPage(currentPage);
+            }
+          }
+        });
+        generateIcons(pages[0], 10, 1, audio1);
+  generateIcons(pages[1], 4, 11, audio1);
+  generateIcons(pages[2], 8, 15, audio2);
+  generateIcons(pages[3], 6, 23, audio2);
+      }
+      init();
+    </script>
+  </body>
+  </html>
