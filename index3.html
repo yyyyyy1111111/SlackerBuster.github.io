@@ -4,7 +4,7 @@
   <title>摸鱼消消乐</title>
   <style>
     body {
-      background-image: url('/Users/yy/Desktop/text2/图片/20180917120412347.jpg');
+      background-image: url('20180917120412347.jpg');
       background-repeat: no-repeat;
       background-size: cover;
     }
@@ -93,16 +93,16 @@
     var gameDurationText = document.getElementById('gameDuration');
 
     // Preload audio files
-    var audio1 = new Audio('/Users/yy/Desktop/text2/notification.m4a');
-    var audio2 = new Audio('/Users/yy/Desktop/text2/notification2.m4a');
-    var replyAudio = new Audio('/Users/yy/Desktop/text2/回复.m4a');
+    var audio1 = new Audio('notification.m4a');
+    var audio2 = new Audio('notification2.m4a');
+    var replyAudio = new Audio('回复.m4a');
 
     for (var i = 1; i <= iconCount; i++) {
       var appIcon = document.createElement('div');
       appIcon.className = 'app-icon';
 
       var img = document.createElement('img');
-      img.src = '/Users/yy/Desktop/text2/图片/icon' + i + '.png';
+      img.src = 'icon' + i + '.png';
       img.alt = 'Icon ' + i;
       img.width = 60;
       img.height = 60;
