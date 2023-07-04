@@ -135,7 +135,7 @@
       var incrementInterval;
       var gameOverMessage = document.getElementsByClassName('game-over')[0];
       var gameDurationText = document.getElementById('gameDuration');
-      var currentPage = 0;
+      var currentPage = 1;
       var currentPageIndicator = document.getElementById('currentPageIndicator');
       var startTime;
 
@@ -317,8 +317,8 @@ function endSwipe() {
       }
 
         startTime = new Date().getTime();
-        setInterval(showRandomNotification, 1500);
-        incrementInterval = setInterval(incrementNotificationCounts, 1500);
+        setInterval(showRandomNotification, 5000);
+        incrementInterval = setInterval(incrementNotificationCounts, 2500);
 
         function incrementNotificationCounts() {
           for (var i = 0; i < notificationCounts.length; i++) {
