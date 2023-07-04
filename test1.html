@@ -13,6 +13,7 @@
       flex-wrap: nowrap;
       height: 100vh;
       transition: transform 0.3s ease-in-out;
+      z-index: 1;
     }
 
     .page {
@@ -25,9 +26,20 @@
       color: #fff;
       font-size: 24px;
     }
+
+    .background-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #ff0000;
+      z-index: -1;
+    }
   </style>
 </head>
 <body>
+  <div class="background-layer"></div>
   <div class="container" id="container">
     <div class="page">Page 1</div>
     <div class="page">Page 2</div>
@@ -35,7 +47,7 @@
   </div>
 
   <script>
-    var container = document.getElementById('container');
+     var container = document.getElementById('container');
     var currentPage = 0;
     var startX = 0;
     var threshold = 100; // 滑动触发翻页的阈值
@@ -87,6 +99,7 @@
       var scrollX = pageIndex * window.innerWidth;
       container.style.transform = 'translateX(-' + scrollX + 'px)';
     }
+
   </script>
 </body>
 </html>
