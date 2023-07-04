@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: nowrap;
+      height: 100vh;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .page {
+      flex: 0 0 100%;
+      height: 100%;
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <div class="page">Page 1</div>
+    <div class="page">Page 2</div>
+    <div class="page">Page 3</div>
+  </div>
+
+  <script>
+    var container = document.getElementById('container');
+    var currentPage = 0;
+    var startX = 0;
+    var threshold = 100; // 滑动触发翻页的阈值
+
+    container.addEventListener('mousedown', startSwipe);
+    container.addEventListener('mousemove', trackSwipe);
+    container.addEventListener('mouseup', endSwipe);
+
+    function startSwipe(event) {
+      startX = event.clientX;
+    }
+
+    function trackSwipe(event) {
+      if (startX === null) {
+        return;
+      }
+
+      var currentX = event.clientX;
+      var deltaX = startX - currentX;
+
+      if (deltaX > threshold) {
+        nextPage();
+        startX = null;
+      } else if (deltaX < -threshold) {
+        previousPage();
+        startX = null;
+      }
+    }
+
+    function endSwipe() {
+      startX = null;
+    }
+
+    function nextPage() {
+      if (currentPage < container.children.length - 1) {
+        currentPage++;
+        scrollToPage(currentPage);
+      }
+    }
+
+    function previousPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        scrollToPage(currentPage);
+      }
+    }
+
+    function scrollToPage(pageIndex) {
+      var scrollX = pageIndex * window.innerWidth;
+      container.style.transform = 'translateX(-' + scrollX + 'px)';
+    }
+  </script>
+</body>
+</html>
