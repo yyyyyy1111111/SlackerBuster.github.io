@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>摸鱼消消乐</title>
+  <style>
+    body {
+      background-image: url('20180917120412347.jpg');
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    .page-container {
+      height: 85vh;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 60px 30px;
+      padding: 24px;
+      justify-items: center; /* Center the icons horizontally */
+      align-items:start; /* Center the icons vertically */
+      grid-auto-rows: minmax(85px, 60px); /* Define the height of each row */
+    }
+    .app-icon {
+      position: relative;
+      width: 54px;
+      height: 54px;
+      background-color: #555;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 50px;
+      cursor: pointer;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -15px;
+      width: 21px;
+      height: 21px;
+      background-color: red;
+      color: #fff;
+      font-size: 14px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease-in-out;
+      opacity: 0;
+    }
+
+    .notification-badge.show {
+      opacity: 1;
+    }
+
+    .game-over {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      font-size: 36px;
+    }
+
+    .app-icon.explode {
+      animation-name: explodeAnimation;
+      animation-duration: 1.0s; /* Adjust the duration of the explosion animation */
+      animation-timing-function: ease-out;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes explodeAnimation {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    .pagination {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      margin: -10px 5px;
+    }
+
+    .page-indicator {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .notification-summary {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .notification-summary span {
+      margin: 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container" id="page1">
+  </div>
+  <div class="page-container" id="page2">
+  </div>
+  <div class="page-container" id="page3">
+  </div>
+  <div class="page-container" id="page4">
+  </div>
+  <div class="game-over" style="display: none;">
+    <h1>GAME OVER</h1>
+    <div id="gameDuration"></div>
+  </div>
+  <div class="notification-summary">
+    未点击的红点数：<span id="notClickedCount">0</span>
+    点击的红点数：<span id="clickedCount">0</span>
+  </div>
+  <div class="pagination">
+    <button id="prevPage">上一页</button>
+    <span class="page-indicator" id="currentPageIndicator"></span>
+    <button id="nextPage">下一页</button>
+  </div>
+  <script>
+    var pages = document.getElementsByClassName('page-container');
+    var notificationInterval;
+    var incrementInterval;
+    var gameOverMessage = document.getElementsByClassName('game-over')[0];
+    var gameDurationText = document.getElementById('gameDuration');
+    var currentPage = 1;
+    var currentPageIndicator = document.getElementById('currentPageIndicator');
+    var notClickedCountText = document.getElementById('notClickedCount');
+    var clickedCountText = document.getElementById('clickedCount');
+    var startTime;
+    // Preload audio files
+    var audio1 = new Audio('notification.m4a');
+    var audio2 = new Audio('notification2.m4a');
+    var replyAudio = new Audio('回复.m4a');
+
+    function showPage(page) {
+      for (var i = 0; i < pages.length; i++) {
+        if (i + 1 === page) {
+          pages[i].style.display = 'grid';
+        } else {
+          pages[i].style.display = 'none';
+        }
+      }
+
+      currentPageIndicator.textContent = '当前页: ' + page + ' / ' + pages.length;
+    }
+
+    function generateIcons(container, iconCount, startIconIndex, audio) {
+      container.innerHTML = '';
+
+      for (var i = startIconIndex; i < startIconIndex + iconCount; i++) {
+        var appIcon = document.createElement('div');
+        appIcon.className = 'app-icon';
+
+        var img = document.createElement('img');
+        img.src = 'icon' + i + '.png';
+        img.alt = 'Icon ' + i;
+        img.width = 60;
+        img.height = 60;
+        appIcon.appendChild(img);
+
+        var notificationBadge = document.createElement('span');
+        notificationBadge.className = 'notification-badge';
+        appIcon.appendChild(notificationBadge);
+
+        container.appendChild(appIcon);
+      }
+
+      var notificationCounts = new Array(iconCount).fill(0);
+      var notClickedCount = iconCount;
+      var currentPageHasNotification = false;
+
+      function showRandomNotification() {
+        if (!currentPageHasNotification) {
+          var randomIconIndex = Math.floor(Math.random() * iconCount);
+          var notificationBadge = container.children[randomIconIndex].querySelector('.notification-badge');
+          notificationBadge.innerText = '1';
+          notificationBadge.classList.add('show');
+          currentPageHasNotification = true;
+          playNotificationSound1();
+          setTimeout(function() {
+            notificationBadge.innerText = '';
+            notificationBadge.classList.remove('show');
+            notClickedCountText.textContent = --notClickedCount;
+            currentPageHasNotification = false;
+          }, 3000);//红点持续时间
+          
+        }
+        
+      }
+
+      function clearNotification(iconIndex, container, audio) {
+  var appIcon = container.children[iconIndex - 1];
+  var notificationBadge = appIcon.querySelector('.notification-badge');
+
+  var count = 5;
+  var countdownInterval = setInterval(function() {
+    notificationBadge.innerText = count--;
+    if (count < 0) {
+      clearInterval(countdownInterval);
+      appIcon.classList.add('explode');
+      setTimeout(function() {
+        appIcon.classList.remove('explode');
+        notificationBadge.innerText = '';
+        notificationBadge.classList.remove('show');
+      }, 1000);
+    }
+  }, 1000);
+}
+
+      function playNotificationSound1() {
+        audio1.currentTime = 0;
+        var playPromise = audio1.play();
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {}).catch(error => {});
+        }
+      }
+
+      function playNotificationSound2() {
+        audio2.currentTime = 0;
+        var playPromise = audio2.play();
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {}).catch(error => {});
+        }
+      }
+
+      function playReplySound() {
+        replyAudio.currentTime = 0;
+        var playPromise = replyAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(_ => {}).catch(error => {});
+        }
+      }
+
+      startTime = new Date().getTime();
+      setInterval(showRandomNotification, 2000);//红点出现间隔
+      incrementInterval = setInterval(incrementNotificationCounts, 1000);
+
+      function incrementNotificationCounts() {
+        for (var i = 0; i < notificationCounts.length; i++) {
+          if (notificationCounts[i] > 0) {
+            var notificationBadge = container.children[i].querySelector('.notification-badge');
+            notificationCounts[i]++;
+            notificationBadge.innerText = notificationCounts[i];
+          }
+        }
+
+        if (notificationCounts.some(count => count >= 10)) {
+          clearInterval(notificationInterval);
+          clearInterval(incrementInterval);
+          gameOverMessage.style.display = 'block';
+          gameDurationText.textContent = calculateGameDuration();
+        }
+      }
+
+      function calculateGameDuration() {
+        var currentTime = new Date();
+        var endTime = currentTime.getTime();
+        var duration = endTime - startTime;
+        var minutes = Math.floor(duration / 60000);
+        var seconds = Math.floor((duration % 60000) / 1000);
+        return minutes + ' 分 ' + padZero(seconds) + ' 秒';
+      }
+
+      function padZero(num) {
+        return (num < 10 ? '0' : '') + num;
+      }
+
+      // Add click event listener to each app icon
+      container.addEventListener('click', function(event) {
+        var clickedElement = event.target;
+
+        // Find the closest app-icon element that was clicked
+        var appIcon = clickedElement.closest('.app-icon');
+
+        // Check if a valid app-icon was clicked
+        if (appIcon) {
+          var notificationBadge = appIcon.querySelector('.notification-badge');
+          var notificationCount = parseInt(notificationBadge.innerText);
+
+          if (notificationCount > 0) {
+            notificationBadge.innerText = '';
+            notificationBadge.classList.remove('show');
+            clickedCountText.textContent = parseInt(clickedCountText.textContent) + 1;
+            notClickedCountText.textContent = parseInt(notClickedCountText.textContent) - 1;
+
+            // Play reply sound
+            playReplySound();
+          }
+        }
+      });
+    }
+
+    function init() {
+      showPage(currentPage);
+
+      document.getElementById('prevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showPage(currentPage);
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', function() {
+        if (currentPage < pages.length) {
+          currentPage++;
+          showPage(currentPage);
+        }
+      });
+
+      document.addEventListener('keydown', function(event) {
+        if (event.keyCode === 37) {
+          if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+          }
+        } else if (event.keyCode === 39) {
+          if (currentPage < pages.length) {
+            currentPage++;
+            showPage(currentPage);
+          }
+        }
+      });
+
+      generateIcons(pages[0], 10, 1, audio1);
+      generateIcons(pages[1], 4, 11, audio1);
+      generateIcons(pages[2], 8, 15, audio2);
+      generateIcons(pages[3], 6, 23, audio2);
+    }
+
+    init();
+  </script>
+</body>
+</html>
