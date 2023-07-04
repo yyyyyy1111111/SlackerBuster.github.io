@@ -89,7 +89,7 @@
   #restartButton:hover {
     background-color: #ffffff;
   }
-  
+
 </style>
 </head>
 <body>
@@ -250,8 +250,26 @@
       }
     }
 
-    function restartGame() {
-    location.reload();
+   function restartGame() {
+    gameOverMessage.style.display = 'none';
+    gameDurationText.textContent = '';
+    
+    // Reset notification counts
+    notificationCounts = new Array(iconCount).fill(0);
+    
+    // Clear all notification badges
+    var notificationBadges = document.getElementsByClassName('notification-badge');
+    for (var i = 0; i < notificationBadges.length; i++) {
+      var badge = notificationBadges[i];
+      badge.innerText = '';
+      badge.classList.remove('show');
+    }
+    
+    clearInterval(notificationInterval);
+    clearInterval(incrementInterval);
+    startTime = new Date().getTime();
+    notificationInterval = setInterval(showRandomNotification, 900);
+    incrementInterval = setInterval(incrementNotificationCounts, 800);
   }
 
     function calculateGameDuration() {
