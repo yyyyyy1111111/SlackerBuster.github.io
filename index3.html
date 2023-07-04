@@ -50,7 +50,7 @@
 
 .game-over {
   position: fixed;
-  top: 50%;
+  top: 43%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
@@ -74,8 +74,22 @@
     opacity: 0;
   }
 }
+#restartButton {
+    display: inline-block;
+    padding: 5px 52px;
+    font-size: 85px;
+    background-color: #ffffff;
+    color: black;
+    border: none;
+    border-radius: 21px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
 
-
+  #restartButton:hover {
+    background-color: #ffffff;
+  }
+  
 </style>
 </head>
 <body>
@@ -85,7 +99,9 @@
   <div id="gameOverMessage" class="game-over" style="display: none;">
     <h1>GAME OVER</h1>
     <div id="gameDuration"></div>
+    <button id="restartButton">重新开始</button>
   </div>
+  
   <script>
     var iconCount = 28;
     var iconsContainer = document.getElementById('icons-container');
@@ -93,6 +109,10 @@
     var incrementInterval;
     var gameOverMessage = document.getElementById('gameOverMessage');
     var gameDurationText = document.getElementById('gameDuration');
+
+    var restartButton = document.getElementById('restartButton');
+  restartButton.addEventListener('click', restartGame);
+
 
     // Preload audio files
     var audio1 = new Audio('notification.m4a');
@@ -229,6 +249,10 @@
         gameDurationText.textContent = calculateGameDuration();
       }
     }
+
+    function restartGame() {
+    location.reload();
+  }
 
     function calculateGameDuration() {
       var currentTime = new Date();
