@@ -40,12 +40,12 @@
     var startX = 0;
     var threshold = 100; // 滑动触发翻页的阈值
 
-    container.addEventListener('mousedown', startSwipe);
-    container.addEventListener('mousemove', trackSwipe);
-    container.addEventListener('mouseup', endSwipe);
+    container.addEventListener('touchstart', startSwipe);
+    container.addEventListener('touchmove', trackSwipe);
+    container.addEventListener('touchend', endSwipe);
 
     function startSwipe(event) {
-      startX = event.clientX;
+      startX = event.touches[0].clientX;
     }
 
     function trackSwipe(event) {
@@ -53,7 +53,7 @@
         return;
       }
 
-      var currentX = event.clientX;
+      var currentX = event.touches[0].clientX;
       var deltaX = startX - currentX;
 
       if (deltaX > threshold) {
