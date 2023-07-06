@@ -15,7 +15,7 @@
         padding: 24px;
         justify-items: center; /* Center the icons horizontally */
         align-items:start; /* Center the icons vertically */
-        grid-auto-rows: minmax(85px, 60px); /* Define the height of each row */
+        grid-auto-rows: minmax(85px, 189px); /* Define the height of each row */
         transition: transform 0.3s ease-in-out;
         z-index: 1;
       }
@@ -40,8 +40,8 @@
 
       .app-icon {
         position: relative;
-        width: 54px;
-        height: 54px;
+        width: 120px;
+        height: 120px;
         background-color: #555;
         border-radius: 50%;
         text-align: center;
@@ -51,13 +51,13 @@
 
       .notification-badge {
         position: absolute;
-        top: -5px;
-        right: -15px;
-        width: 21px;
-        height: 21px;
+        top: -26px;
+        right: -65px;
+        width: 53px;
+        height: 53px;
         background-color: red;
         color: #fff;
-        font-size: 14px;
+        font-size: 34px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -72,12 +72,12 @@
 
       .game-over {
         position: fixed;
-        top: 50%;
+        top: 43%;
         left: 50%;
         transform: translate(-50%, -50%);
         text-align: center;
         color: white;
-        font-size: 36px;
+        font-size: 101px;
       }
       .app-icon.explode {
     animation-name: explodeAnimation;
@@ -220,8 +220,8 @@ function endSwipe() {
           var img = document.createElement('img');
           img.src = 'icon' + i + '.png';
           img.alt = 'Icon ' + i;
-          img.width = 60;
-          img.height = 60;
+          img.width = 150;
+          img.height = 150;
           appIcon.appendChild(img);
 
           var notificationBadge = document.createElement('span');
